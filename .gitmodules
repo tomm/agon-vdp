@@ -1,0 +1,3 @@
+[submodule "lib/FabGL"]
+	path = lib/FabGL
+	url = https://github.com/avalonbits/vdp-gl.git

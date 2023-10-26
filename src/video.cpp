@@ -64,6 +64,9 @@
 #include "vdu_stream_processor.h"
 #include "hexload.h"
 
+// All the stuff used before it's defined in this file...
+#include "video.h"
+
 bool					terminalMode = false;	// Terminal mode
 fabgl::Terminal			Terminal;				// Used for CP/M mode
 VDUStreamProcessor *	processor;				// VDU Stream Processor
@@ -204,7 +207,6 @@ void switchTerminalMode() {
 	cls(true);
 	canvas.reset();
 	Terminal.begin(_VGAController.get());	
-	Terminal.connectSerialPort(VDPSerial);
 	Terminal.enableCursor(true);
 	terminalMode = true;
 }
