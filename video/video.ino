@@ -74,7 +74,9 @@ bool			consoleMode = false;			// Serial console mode (0 = off, 1 = console enabl
 fabgl::Terminal			Terminal;				// Used for CP/M mode
 VDUStreamProcessor *	processor;				// VDU Stream Processor
 
+#ifndef USERSPACE
 #include "zdi.h"								// ZDI debugging console
+#endif
 
 void setup() {
 	disableCore0WDT(); delay(200);				// Disable the watchdog timers
@@ -99,6 +101,9 @@ void loop() {
 	bool cursorState = false;
 
 	while (true) {
+ 		if ((count & 0x7f) == 0) delay(1 /* -TM- ms */);
+ 		count++;
+
 		if (terminalMode) {
 			do_keyboard_terminal();
 			continue;
@@ -118,9 +123,9 @@ void loop() {
 				cursorState = false;
 				do_cursor();
 			}
+			count = -1;
 			processor->processNext();
 		}
-		count++;
 	}
 }
 
