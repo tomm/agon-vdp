@@ -53,7 +53,7 @@
 #define REVISION		4
 #define RC				0
 
-#define	DEBUG			0						// Serial Debug Mode: 1 = enable
+#define	DEBUG			1						// Serial Debug Mode: 1 = enable
 #define SERIALBAUDRATE	115200
 
 HardwareSerial	DBGSerial(0);
@@ -197,6 +197,7 @@ void boot_screen() {
 
 // Debug printf to PC
 //
+#ifndef USERSPACE
 void debug_log(const char *format, ...) {
 	#if DEBUG == 1
 	va_list ap;
@@ -212,6 +213,7 @@ void debug_log(const char *format, ...) {
 	va_end(ap);
 	#endif
 }
+#endif
 
 // Set console mode
 // Parameters:
