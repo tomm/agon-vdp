@@ -56,6 +56,8 @@
 #define	DEBUG			1						// Serial Debug Mode: 1 = enable
 #define SERIALBAUDRATE	115200
 
+extern uint32_t startup_screen_mode; /* in rust_glue.cpp */
+
 HardwareSerial	DBGSerial(0);
 
 bool			terminalMode = false;			// Terminal mode (for CP/M)
@@ -88,7 +90,7 @@ void setup() {
 	setupKeyboardAndMouse();
 	init_audio();
 	copy_font();
-	set_mode(1);
+	set_mode(startup_screen_mode);
 	processor->sendModeInformation();
 	boot_screen();
 }
