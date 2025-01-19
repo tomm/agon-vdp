@@ -116,7 +116,7 @@ bool getKeyboardKey(uint8_t *keycode, uint8_t *modifiers, uint8_t *vk, uint8_t *
 			return true;			
 		}
 	}
-	
+
 	if (kb->getNextVirtualKey(&item, 0)) {
 		if (item.down) {
 			switch (item.vk) {
@@ -139,7 +139,7 @@ bool getKeyboardKey(uint8_t *keycode, uint8_t *modifiers, uint8_t *vk, uint8_t *
 					_keycode = 0x7F;
 					break;
 				default:
-					_keycode = item.ASCII;	
+					_keycode = item.ASCII;
 					break;
 			}
 			// Pack the modifiers into a byte

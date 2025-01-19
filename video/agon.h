@@ -64,6 +64,7 @@
 #define VDP_FONT				0x95	// Font management commands
 #define VDP_AFFINE_TRANSFORM	0x96	// Set affine transform
 #define VDP_CONTROLKEYS			0x98	// Control keys on/off
+#define VDP_CHECKKEY			0x99	// Request updated keyboard data for a key
 #define VDP_BUFFER_PRINT		0x9B	// Print a buffer of characters literally with no command interpretation
 #define VDP_TEXT_VIEWPORT		0x9C	// Set text viewport using current graphics coordinates
 #define VDP_GRAPHICS_VIEWPORT	0x9D	// Set graphics viewport using current graphics coordinates
@@ -73,12 +74,13 @@
 #define VDP_UPDATER				0xA1	// Update VDP
 #define VDP_LOGICALCOORDS		0xC0	// Switch BBC Micro style logical coords on and off
 #define VDP_LEGACYMODES			0xC1	// Switch VDP 1.03 compatible modes on and off
+#define VDP_LAYERS				0xC2	// Tile engine layer management commands (experimental)
 #define VDP_SWITCHBUFFER		0xC3	// Double buffering control
 #define VDP_CONTEXT				0xC8	// Context management commands
 #define VDP_FLUSH_DRAWING_QUEUE	0xCA	// Flush the drawing queue
 #define VDP_PATTERN_LENGTH		0xF2	// Set pattern length (*FX 163,242,n)
-#define VDP_TESTFLAG_SET		0xF8	// Set a test flag
-#define VDP_TESTFLAG_CLEAR		0xF9	// Clear a test flag
+#define VDP_FEATUREFLAG_SET		0xF8	// Set a test flag
+#define VDP_FEATUREFLAG_CLEAR	0xF9	// Clear a test flag
 #define VDP_CONSOLEMODE			0xFE	// Switch console mode on and off
 #define VDP_TERMINALMODE		0xFF	// Switch to terminal mode
 
@@ -390,8 +392,11 @@
 #define BUFFERED_BITMAP_BASEID	0xFA00	// Base ID for buffered bitmaps
 #define BUFFERED_SAMPLE_BASEID	0xFB00	// Base ID for buffered samples
 
-// Test flags
-#define TEST_FLAG_AFFINE_TRANSFORM	1	// Affine transform test flag
+// Test/Feature flags
+#define TESTFLAG_AFFINE_TRANSFORM	1	// Affine transform test flag
+
+#define FEATUREFLAG_FULL_DUPLEX	0x0101	// Full duplex UART comms flag
+#define FEATUREFLAG_TILE_ENGINE	0x0300	// Tile engine flag (layers commands)
 
 #define LOGICAL_SCRW			1280	// As per the BBC Micro standard
 #define LOGICAL_SCRH			1024

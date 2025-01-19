@@ -10,7 +10,7 @@
 #include "agon.h"
 #include "agon_ps2.h"
 #include "agon_screen.h"
-#include "test_flags.h"
+#include "feature_flags.h"
 #include "vdu_audio.h"
 #include "vdu_buffered.h"
 #include "vdu_context.h"
@@ -18,6 +18,7 @@
 #include "vdu_sprites.h"
 #include "updater.h"
 #include "vdu_stream_processor.h"
+#include "vdu_layers.h"
 
 extern void startTerminal();					// Start the terminal
 extern void setConsoleMode(bool mode);			// Set console mode
@@ -238,7 +239,7 @@ void VDUStreamProcessor::vdu_sys_video() {
 			vdu_sys_font();				// Font management
 		}	break;
 		case VDP_AFFINE_TRANSFORM: {	// VDU 23, 0, &96, flags, bufferId;
-			if (!isTestFlagSet(TEST_FLAG_AFFINE_TRANSFORM)) {
+			if (!isFeatureFlagSet(TESTFLAG_AFFINE_TRANSFORM)) {
 				return;
 			}
 			auto flags = readByte_t();	// Set affine transform flags
@@ -254,6 +255,14 @@ void VDUStreamProcessor::vdu_sys_video() {
 			if (b >= 0) {
 				controlKeys = (bool) b;
 			}
+		}	break;
+		case VDP_CHECKKEY: {
+			auto key = readByte_t();	// VDU 23, 0, &99, virtualkey
+			if (key == -1) return;
+			// Inject an updated virtual key event for a key, forcing a new keycode packet to be sent
+			// NB must use a virtual key here, as we can't convert a keycode to a virtual key
+			auto keyboard = getKeyboard();
+			keyboard->injectVirtualKey((VirtualKey) key, keyboard->isVKDown((VirtualKey) key), false);
 		}	break;
 		case VDP_BUFFER_PRINT: {		// VDU 23, 0, &9B
 			auto bufferId = readWord_t();
@@ -308,6 +317,12 @@ void VDUStreamProcessor::vdu_sys_video() {
 				setLegacyModes((bool) b);
 			}
 		}	break;
+		case VDP_LAYERS: {				// VDU 23, 0, &C2, n
+			if (!isFeatureFlagSet(FEATUREFLAG_TILE_ENGINE)) {
+				return;
+			}
+			vdu_sys_layers();
+		}	break;
 		case VDP_SWITCHBUFFER: {		// VDU 23, 0, &C3
 			switchBuffer();
 		}	break;
@@ -323,14 +338,14 @@ void VDUStreamProcessor::vdu_sys_video() {
 				context->setDottedLinePatternLength(b);
 			}
 		}	break;
-		case VDP_TESTFLAG_SET: {		// VDU 23, 0, &F8, flag; value;
-			auto flag = readWord_t();	// Set a test flag
+		case VDP_FEATUREFLAG_SET: {		// VDU 23, 0, &F8, flag; value;
+			auto flag = readWord_t();	// Set a test/feature flag
 			auto value = readWord_t();
-			setTestFlag(flag, value);
+			setFeatureFlag(flag, value);
 		}	break;
-		case VDP_TESTFLAG_CLEAR: {		// VDU 23, 0, &F9, flag
-			auto flag = readWord_t();	// Clear a test flag
-			clearTestFlag(flag);
+		case VDP_FEATUREFLAG_CLEAR: {	// VDU 23, 0, &F9, flag
+			auto flag = readWord_t();	// Clear a test/feature flag
+			clearFeatureFlag(flag);
 		}	break;
 		case VDP_CONSOLEMODE: {			// VDU 23, 0, &FE, n
 			auto b = readByte_t();

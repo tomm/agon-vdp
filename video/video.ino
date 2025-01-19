@@ -52,8 +52,10 @@
 // Serial Debug Mode: 1 = enable
 // Always enabled on the emulator, to support --verbose mode
 #ifdef USERSPACE
+#undef DEBUG
 # define	DEBUG			1
 #else /* !USERSPACE */
+#undef DEBUG
 # define	DEBUG			0
 #endif /* USERSPACE */
 
@@ -83,7 +85,7 @@ bool			controlKeys = true;				// Control keys enabled
 #include "vdu_stream_processor.h"
 #include "hexload.h"
 
-std::unique_ptr<fabgl::Terminal>	Terminal;	// Used for CP/M mode
+std::unique_ptr<fabgl::Terminal>	Terminal;	// Used for Terminal emulation mode (for CP/M, etc)
 VDUStreamProcessor *	processor;				// VDU Stream Processor
 
 #ifndef USERSPACE
@@ -134,7 +136,9 @@ void processLoop(void * parameter) {
 
 	while (true) {
 #ifdef USERSPACE
- 		if ((count & 0x7f) == 0) delay(1 /* -TM- ms */);
+ 		if ((count & 0x7f) == 0) {
+			delay(1 /* -TM- ms */);
+		}
  		count++;
 #endif /* USERSPACE */
 
@@ -166,7 +170,7 @@ void do_keyboard() {
 	uint8_t modifiers;
 	uint8_t vk;
 	uint8_t down;
-	if (getKeyboardKey(&keycode, &modifiers, &vk, &down)) {
+	while (getKeyboardKey(&keycode, &modifiers, &vk, &down)) {
 		// Handle some control keys
 		//
 		if (controlKeys && down) {
@@ -326,7 +330,7 @@ bool processTerminal() {
 		case TerminalState::Enabling: {
 			// Turn on the terminal
 			Terminal = std::unique_ptr<fabgl::Terminal>(new fabgl::Terminal());
-			Terminal->begin(_VGAController.get());	
+			Terminal->begin(_VGAController.get());
 			Terminal->connectSerialPort(VDPSerial);
 			Terminal->enableCursor(true);
 			// onVirtualKey is triggered whenever a key is pressed or released
@@ -347,6 +351,15 @@ bool processTerminal() {
 				}
 				if (strcmp("S!", seq) == 0) {
 					suspendTerminal();
+				}
+				if (seq[0] == 'F') {
+					uint32_t fontnum = textToWord(seq + 1);
+					if (fontnum >= 0) {
+						auto font = fonts[fontnum]; 	// get shared_ptr to font -- was fonts[bufferID]
+						if (font != nullptr && font->chptr == nullptr) {	// check it's defined
+							Terminal->loadFont(font.get());
+						}
+					}
 				}
 			};
 			debug_log("Terminal enabled\n\r");
