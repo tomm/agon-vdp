@@ -253,7 +253,9 @@ void hideSprite(uint8_t s = current_sprite) {
 
 void setSpriteHardware() {
 	auto sprite = getSprite();
+#ifndef USERSPACE
 	sprite->hardware = 1;
+#endif /* USERSPACE */
 }
 
 void setSpriteSoftware() {
@@ -293,7 +295,11 @@ void resetSprites() {
 	bool autoHardwareSprites = isFeatureFlagSet(TESTFLAG_HW_SPRITES) && isFeatureFlagSet(FEATURE_FLAG_AUTO_HW_SPRITES);
 	for (auto n = 0; n < MAX_SPRITES; n++) {
 		auto sprite = getSprite(n);
+#ifdef USERSPACE
+		sprite->hardware = 0;
+#else
 		sprite->hardware = autoHardwareSprites ? 1 : 0;
+#endif /* USERSPACE */
 		clearSpriteFrames(n);
 	}
 	activateSprites(0);
