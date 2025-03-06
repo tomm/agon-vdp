@@ -5,7 +5,6 @@
 #include <vector>
 
 #include <fabgl.h>
-#include <ESP32Time.h>
 
 #include "agon.h"
 #include "agon_ps2.h"
@@ -25,7 +24,6 @@ extern void setConsoleMode(bool mode);			// Set console mode
 extern bool controlKeys;	
 
 bool			initialised = false;			// Is the system initialised yet?
-ESP32Time		rtc(0);							// The RTC
 
 // Buffer for serialised time
 //
@@ -108,9 +106,11 @@ void VDUStreamProcessor::vdu_sys() {
 				}
 			}	break;
 			case 0x1B: {					// VDU 23, 27
+				clearEcho();				// Don't echo bitmap/sprite commands
 				vdu_sys_sprites();			// Sprite system control
 			}	break;
 			case 0x1C: {					// VDU 23, 28
+				clearEcho();				// Don't echo hexload commands
 				vdu_sys_hexload();
 			}	break;
 		}
@@ -131,6 +131,9 @@ void VDUStreamProcessor::vdu_sys() {
 //
 void VDUStreamProcessor::vdu_sys_video() {
 	auto mode = readByte_t();
+
+	// TODO - consider whether we want to clear echo for _all_ VDU 23 commands
+	clearEcho();
 
 	switch (mode) {
 		case VDP_CURSOR_VSTART: {		// VDU 23, 0, &0A, offset
@@ -325,6 +328,12 @@ void VDUStreamProcessor::vdu_sys_video() {
 		}	break;
 		case VDP_SWITCHBUFFER: {		// VDU 23, 0, &C3
 			switchBuffer();
+		}	break;
+		case VDP_COPPER: {				// VDU 23, 0, &C4, command, [<args>]
+			if (!isFeatureFlagSet(FEATUREFLAG_COPPER)) {
+				return;
+			}
+			vdu_sys_copper();
 		}	break;
 		case VDP_CONTEXT: {				// VDU 23, 0, &C8, command, [<args>]
 			vdu_sys_context();			// Context management
@@ -670,6 +679,50 @@ void VDUStreamProcessor::vdu_sys_mouse() {
 				debug_log("vdu_sys_mouse: set wheel acceleration %d\n\r", wheelAcc);
 				return;
 			}
+		}	break;
+	}
+}
+
+// VDU 23, 0, &C4, command, [<args>]: Handle copper requests
+void VDUStreamProcessor::vdu_sys_copper() {
+	auto command = readByte_t(); if (command == -1) return;
+
+	switch (command) {
+		case COPPER_CREATE_PALETTE: {
+			auto paletteId = readWord_t(); if (paletteId == -1) return;
+
+			createPalette(paletteId);
+		}	break;
+		case COPPER_DELETE_PALLETE: {
+			auto paletteId = readWord_t(); if (paletteId == -1) return;
+
+			deletePalette(paletteId);
+		}	break;
+		case COPPER_SET_PALETTE_COLOUR: {
+			auto paletteId = readWord_t(); if (paletteId == -1) return;
+			auto index = readByte_t(); if (index == -1) return;
+			auto r = readByte_t(); if (r == -1) return;
+			auto g = readByte_t(); if (g == -1) return;
+			auto b = readByte_t(); if (b == -1) return;
+
+			setItemInPalette(paletteId, index, RGB888(r, g, b));
+		}	break;
+		case COPPER_UPDATE_SIGNALLIST: {
+			auto bufferId = readWord_t(); if (bufferId == -1) return;
+
+			auto bufferIter = buffers.find(bufferId);
+			if (bufferIter == buffers.end()) {
+				debug_log("vdu_sys_copper: buffer %d not found\n\r", bufferId);
+				return;
+			}
+
+			// only use first block in buffer
+			auto buffer = bufferIter->second[0];
+			updateSignalList((uint16_t *)buffer->getBuffer(), buffer->size() / 4);
+		}	break;
+		case COPPER_RESET_SIGNALLIST: {
+			uint16_t signalList[2] = { 0, 0 };
+			updateSignalList(signalList, 1);
 		}	break;
 	}
 }
