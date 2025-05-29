@@ -14,7 +14,7 @@
 #include "sprites.h"
 
 extern bool isFeatureFlagSet(uint16_t flag);
-extern uint lastFrameCounter;
+extern uint32_t lastFrameCounter;
 
 // Support structures
 

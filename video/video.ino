@@ -76,7 +76,7 @@ TerminalState	terminalState = TerminalState::Disabled;		// Terminal state (for C
 bool			consoleMode = false;			// Serial console mode (0 = off, 1 = console enabled)
 bool			printerOn = false;				// Output "printer" to debug serial link
 bool			controlKeys = true;				// Control keys enabled
-uint			lastFrameCounter = 0;			// Last frame counter
+uint32_t			lastFrameCounter = 0;			// Last frame counter
 ESP32Time		rtc(0);							// The RTC
 
 #include "version.h"							// Version information
