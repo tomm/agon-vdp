@@ -559,7 +559,7 @@ void Context::resetPagedModeCount() {
 	uint8_t x, y;
 	auto pageRows = getNormalisedViewportCharHeight();
 	getCursorTextPosition(&x, &y);
-	pagedModeCount = max(pageRows - y, pageRows - pagedModeContext);
+	pagedModeCount = std::max(pageRows - y, pageRows - pagedModeContext);
 }
 
 uint8_t Context::getCharsRemainingInLine() {
