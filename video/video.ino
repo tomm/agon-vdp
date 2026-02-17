@@ -129,19 +129,14 @@ void loop() {
 }
 
 void processLoop(void * parameter) {
-#ifdef USERSPACE
-	uint32_t count = 0;
-#endif /* USERSPACE */
-
 	setupKeyboardAndMouse();
 	processor->wait_eZ80();
 
 	while (true) {
 #ifdef USERSPACE
- 		if ((count & 0x7f) == 0) {
-			delay(1 /* -TM- ms */);
+ 		if (!VDPSerial.available()) {
+			std::this_thread::sleep_for(std::chrono::microseconds(8));
 		}
- 		count++;
 #endif /* USERSPACE */
 
 		#ifdef VDP_USE_WDT
