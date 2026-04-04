@@ -116,7 +116,6 @@ void setup() {
 		0			// Core 0
 	);
 	initAudio();
-	boot_screen();
 	debug_log("Setup ran on core %d, busy core is %d\n\r", xPortGetCoreID(), CoreUsage::busiestCore());
 }
 
@@ -129,6 +128,7 @@ void loop() {
 }
 
 void processLoop(void * parameter) {
+	boot_screen();
 	setupKeyboardAndMouse();
 	processor->wait_eZ80();
 
