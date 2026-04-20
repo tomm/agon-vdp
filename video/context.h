@@ -199,10 +199,12 @@ class Context {
 		void plotLine(bool omitFirstPoint, bool omitLastPoint, bool usePattern, bool resetPattern);
 		void plotPoint();
 		void fillHorizontalLine(bool scanLeft, bool match, RGB888 matchColor);
+		void floodFill(bool match, RGB888 matchColor);
 		void plotTriangle();
 		void plotRectangle();
 		void plotParallelogram();
 		void plotCircle(bool filled);
+		void plotEllipse(bool filled);
 		void plotArc();
 		void plotSegment();
 		void plotSector();
@@ -396,7 +398,7 @@ Context::Context(const Context &c) {
 		}
 		if (textCursorBitmap && c.textCursorSprite) {
 			// Create a new sprite for the text cursor
-			textCursorSprite = make_shared_psram<Sprite>();
+			textCursorSprite = std::make_shared<Sprite>();
 			if (textCursorSprite) {
 				textCursorSprite->addBitmap(textCursorBitmap.get());
 				textCursorSprite->moveTo(c.textCursorSprite->x, c.textCursorSprite->y);
