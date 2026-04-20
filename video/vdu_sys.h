@@ -113,6 +113,7 @@ void VDUStreamProcessor::vdu_sys() {
 				clearEcho();				// Don't echo bitmap/sprite commands
 				vdu_sys_sprites();			// Sprite system control
 			}	break;
+#ifndef USERSPACE
 			case 0x1C: {
 				clearEcho();                        // Don't echo hexload/ymodem commands
 				int16_t hlcmd = readByte_t();
@@ -129,6 +130,7 @@ void VDUStreamProcessor::vdu_sys() {
 				}
 
 			}   break;
+#endif /* !USERSPACE */
 		}
 	}
 	//
