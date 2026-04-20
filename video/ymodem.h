@@ -1,6 +1,8 @@
 #ifndef YMODEM_H
 #define YMODEM_H
 
+#ifndef USERSPACE
+
 #include <stdlib.h>
 #include <string.h>
 #include "CRC16.h"
@@ -825,4 +827,5 @@ void VDUStreamProcessor::vdu_sys_ymodem_receive(void) {
   uart_flush();
 }
 
+#endif /* !USERSPACE */
 #endif // YMODEM_H
