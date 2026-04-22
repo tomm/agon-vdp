@@ -197,9 +197,7 @@ void hideSprite(uint8_t s = current_sprite) {
 
 void setSpriteHardware() {
 	auto sprite = getSprite();
-#ifndef USERSPACE
 	sprite->hardware = 1;
-#endif /* USERSPACE */
 }
 
 void setSpriteSoftware() {
