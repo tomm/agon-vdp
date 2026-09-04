@@ -64,6 +64,7 @@
 
 #ifdef USERSPACE
 extern uint32_t startup_screen_mode; /* in rust_glue.cpp */
+extern bool process_loop_finished; /* in rust_glue.cpp */
 #else /* !USERSPACE */
 #define startup_screen_mode 0
 #endif /* !USERSPACE */
@@ -132,7 +133,7 @@ void processLoop(void * parameter) {
 	setupKeyboardAndMouse();
 	processor->wait_eZ80();
 
-	while (true) {
+	task_loop {
 #ifdef USERSPACE
  		if (!VDPSerial.available()) {
 			std::this_thread::sleep_for(std::chrono::microseconds(8));
@@ -148,6 +149,12 @@ void processLoop(void * parameter) {
 
 		processor->processNext();
 	}
+
+#ifdef USERSPACE
+	// let the host know this task has actually stopped touching shared VDP
+	// state, so it can wait for that before tearing anything down
+	process_loop_finished = true;
+#endif /* USERSPACE */
 }
 
 // The boot screen
