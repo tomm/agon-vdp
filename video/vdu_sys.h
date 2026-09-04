@@ -50,7 +50,7 @@ void VDUStreamProcessor::wait_eZ80() {
 		initialised = true;
 	} else {
 		debug_log("wait_eZ80: Start\n\r");
-		while (!initialised) {
+		while (!initialised && !is_fabgl_terminating) {
 			if (byteAvailable()) {
 				auto c = readByte();	// Only handle VDU 23 packets
 				if (c == 23) {
